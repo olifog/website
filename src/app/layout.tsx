@@ -10,7 +10,7 @@ const lato = Lato({
 
 export const metadata: Metadata = {
   title: "Oliver Fogelin",
-  description: "CS Student at the University of Cambridge",
+  description: "Computer Science Student at the University of Cambridge. Love making stuff.",
 };
 
 export default function RootLayout({
