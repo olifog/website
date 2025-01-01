@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { Lato } from "next/font/google";
+import { Analytics } from "@vercel/analytics/react"
 
 const lato = Lato({
   subsets: ["latin-ext"],
@@ -19,7 +20,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${lato.className} antialiased`}>{children}</body>
+      <body className={`${lato.className} antialiased`}>
+        {children}
+        <Analytics />
+      </body>
     </html>
   );
 }
