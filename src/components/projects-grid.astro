@@ -1,0 +1,60 @@
+---
+import { getCollection, render } from "astro:content";
+import ProjectCard from "./project-card.astro";
+import { Masonry } from "astro-masonry";
+
+const projects = await getCollection("projects");
+
+projects.sort((a, b) => (b.data.coolness ?? 0) - (a.data.coolness ?? 0));
+
+const rendered = await Promise.all(
+  projects.map(async (entry) => {
+    const { Content } = await render(entry);
+    const idParts = entry.id.split("/");
+    const projectSlug = idParts.length > 1 ? idParts[1] : entry.id;
+    const href = entry.data.url ?? `/projects/${projectSlug}`;
+
+    return {
+      href,
+      title: entry.data.title,
+      image: entry.data.image,
+      tags: entry.data.tags,
+      date: entry.data.date,
+      Content,
+    };
+  }),
+);
+---
+
+<div class="flex w-full flex-col items-start">
+  <div>
+    <Masonry
+      breakpointCols={{
+        default: 3,
+        900: 2,
+        700: 1,
+      }}
+      class="flex gap-6"
+      columnClass=""
+    >
+      {
+        rendered.map((p) => {
+          const C = p.Content;
+          return (
+            <div class="mb-6">
+              <ProjectCard
+                href={p.href}
+                title={p.title}
+                image={p.image}
+                tags={p.tags}
+                date={p.date}
+              >
+                <C />
+              </ProjectCard>
+            </div>
+          );
+        })
+      }
+    </Masonry>
+  </div>
+</div>

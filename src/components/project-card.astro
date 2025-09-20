@@ -1,0 +1,58 @@
+---
+export interface Props {
+  href?: string;
+  title?: string;
+  image?: string;
+  tags: string[];
+  date?: Date;
+}
+import { formatMonthYearShort } from "../lib/utils";
+
+const { href = "#", title, image, tags = [], date } = Astro.props;
+
+const displayDate = date ? formatMonthYearShort(date) : undefined;
+const isExternal = /^https?:\/\//.test(href);
+---
+
+<a
+  href={href}
+  class="block text-current no-underline"
+  target={isExternal ? "_blank" : undefined}
+  rel={isExternal ? "noopener noreferrer" : undefined}
+>
+  <div
+    class="flex w-80 flex-col overflow-hidden border bg-white/5 transition-shadow hover:shadow-md"
+  >
+    {
+      image && (
+        <img src={image} alt={title} class="max-h-40 p-2 w-full object-contain" />
+      )
+    }
+    <div class="flex flex-col gap-2 p-4">
+      <div class="flex items-center justify-between gap-2">
+        <h3 class="text-lg font-semibold">{title}</h3>
+        {displayDate && <small class="muted">{displayDate}</small>}
+      </div>
+      <div class="text-sm opacity-80">
+        <slot />
+      </div>
+      {
+        tags.length > 0 && (
+          <ul class="mt-1 flex flex-wrap gap-2 list-none">
+            {tags.map((tag) => (
+              <li class="bg-black/6 px-1 py-0.5 text-xs">{tag}</li>
+            ))}
+          </ul>
+        )
+      }
+    </div>
+  </div>
+  <style>
+    .line-clamp-3 {
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+  </style>
+</a>

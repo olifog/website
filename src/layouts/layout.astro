@@ -1,0 +1,66 @@
+---
+import "../styles/global.css";
+export interface Props {
+  title?: string;
+  description?: string;
+  ogImage?: string;
+  ogType?: string;
+  canonical?: string;
+  siteName?: string;
+}
+
+const {
+  title = "olifog",
+  description = "oliver fogelin, cs student / software engineer",
+  ogImage,
+  ogType = "website",
+  canonical,
+  siteName = "olifog",
+} = Astro.props as Props;
+
+const twitterHandle = "@fogelin";
+
+const twitterCard = ogImage ? "summary_large_image" : "summary";
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <link rel="icon" href="/favicon.ico?v=1" sizes="any" />
+    <link rel="shortcut icon" href="/favicon.ico?v=1" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    {canonical && <link rel="canonical" href={canonical} />}
+
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content={ogType} />
+    {siteName && <meta property="og:site_name" content={siteName} />}
+    {canonical && <meta property="og:url" content={canonical} />} 
+    {ogImage && <meta property="og:image" content={ogImage} />}
+
+    <meta name="twitter:card" content={twitterCard} />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    {ogImage && <meta name="twitter:image" content={ogImage} />}
+    <meta name="twitter:site" content={twitterHandle} />
+    <meta name="twitter:creator" content={twitterHandle} />
+  </head>
+  <body class="flex flex-col items-center p-4">
+    <main class="mx-auto max-w-screen-lg w-full">
+      <slot />
+    </main>
+  </body>
+</html>
+
+<style>
+  html,
+  body {
+    margin: 0;
+    width: 100%;
+    height: 100%;
+  }
+</style>

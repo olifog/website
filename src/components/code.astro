@@ -1,0 +1,68 @@
+---
+import { Code as AstroCode } from 'astro:components';
+import type { ComponentProps } from 'astro/types';
+
+type AstroCodeProps = ComponentProps<typeof AstroCode>;
+
+interface Props {
+  code: AstroCodeProps['code'];
+  lang?: AstroCodeProps['lang'];
+  inline?: AstroCodeProps['inline'];
+  wrap?: AstroCodeProps['wrap'];
+  meta?: AstroCodeProps['meta'];
+  showBorder?: boolean;
+}
+
+const { code, lang, inline = false, wrap = false, meta, showBorder = true } = Astro.props as Props;
+---
+
+<AstroCode
+  code={code}
+  lang={lang}
+  inline={inline}
+  wrap={wrap}
+  meta={meta}
+  theme="css-variables"
+  class={showBorder ? 'with-border' : 'no-border'}
+/>
+
+<style>
+  :where(pre.astro-code) {
+    /* Match site foreground/background from global.css */
+    --astro-code-color-text: var(--color-ink);
+    --astro-code-color-background: var(--color-background);
+
+    --astro-code-token-constant: #7c3aed; /* purple */
+    --astro-code-token-string: var(--color-accent);
+    --astro-code-token-comment: var(--color-muted);
+    --astro-code-token-keyword: #b45309; /* amber-ish */
+    --astro-code-token-parameter: #1f2937; /* slate-800 */
+    --astro-code-token-function: #0b7285; /* teal-700 */
+    --astro-code-token-string-expression: var(--color-accent);
+    --astro-code-token-punctuation: var(--color-muted);
+    --astro-code-token-link: #0b7285;
+
+    margin: 0;
+    background-color: var(--astro-code-color-background);
+    color: var(--astro-code-color-text);
+  }
+
+  :where(pre.astro-code).with-border {
+    border: 1px solid color-mix(in oklab, var(--color-ink) 10%, transparent);
+  }
+
+  :where(code.astro-code) {
+    /* Inline code: keep background transparent to blend in text */
+    --astro-code-color-text: var(--color-ink);
+    --astro-code-color-background: transparent;
+  }
+
+  .astro-code {
+    font-family: 'Berkeley Mono';
+    font-size: var(--text-sm);
+    line-height: 0.95rem;
+    border-radius: 0;
+  }
+</style>
+
+

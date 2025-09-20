@@ -1,0 +1,104 @@
+@import "tailwindcss";
+
+@plugin "@tailwindcss/typography";
+
+@theme {
+  /* Cream & ink business-card palette */
+  --color-background: #FAF7F2; /* cream */
+  --color-surface: #F5F1EA;    /* slightly deeper cream */
+  --color-ink: #1A1A1A;        /* near-black ink */
+  --color-muted: #6E6B67;      /* warm gray for secondary text */
+  --color-accent: #9D6B53;     /* muted sepia accent */
+  --color-accent-2: #C8A07A;   /* lighter accent */
+
+  /* Text sizes with base at 14px (0.875rem) */
+  --text-xs: 0.75rem;          /* 12px */
+  --text-sm: 0.8125rem;        /* 13px */
+  --text-base: 0.875rem;       /* 14px */
+  --text-lg: 1rem;             /* 16px */
+  --text-xl: 1.125rem;         /* 18px */
+  --text-2xl: 1.375rem;        /* 22px */
+  --text-3xl: 1.625rem;        /* 26px */
+
+  /* Line-heights */
+  --text-xs--line-height: 1.125rem;      /* 18px (1.5x) */
+  --text-sm--line-height: 1.21875rem;    /* 19.5px (1.5x) */
+  --text-base--line-height: 1.3125rem;   /* 21px (1.5x) */
+  --text-lg--line-height: 1.5rem;        /* 24px (1.5x) */
+  --text-xl--line-height: 1.375rem;      /* 22px (~1.22x) */
+  --text-2xl--line-height: 1.65rem;      /* 26.4px (~1.2x) */
+  --text-3xl--line-height: 1.95rem;      /* 31.2px (~1.2x) */
+}
+
+@font-face {
+  font-family: 'Berkeley Mono';
+  src: url('/fonts/BerkeleyMono-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Berkeley Mono';
+  src: url('/fonts/BerkeleyMono-Oblique.woff2') format('woff2');
+  font-weight: 400;
+  font-style: oblique;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Berkeley Mono';
+  src: url('/fonts/BerkeleyMono-Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Berkeley Mono';
+  src: url('/fonts/BerkeleyMono-Bold-Oblique.woff2') format('woff2');
+  font-weight: 700;
+  font-style: oblique;
+  font-display: swap;
+}
+
+:root {
+  color-scheme: light;
+}
+
+html,
+body {
+  background-color: var(--color-background);
+  color: var(--color-ink);
+  font-family: 'Berkeley Mono';
+  font-size: var(--text-base);
+  line-height: var(--text-base--line-height, 1.3125rem);
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a { color: var(--color-ink); text-decoration-color: var(--color-accent-2); }
+a:hover { text-decoration-color: var(--color-accent); }
+
+h1 { font-weight: 700; letter-spacing: -0.01em; font-size: var(--text-3xl); line-height: var(--text-3xl--line-height, 1.95rem); }
+h2 { font-weight: 700; letter-spacing: -0.005em; font-size: var(--text-2xl); line-height: var(--text-2xl--line-height, 1.65rem); }
+h3 { font-weight: 700; font-size: var(--text-xl); line-height: var(--text-xl--line-height, 1.375rem); }
+h1, h2, h3 { color: var(--color-ink); }
+
+p { color: var(--color-ink); }
+small, .muted { color: var(--color-muted); }
+
+/* Lists */
+
+li {
+  color: var(--color-ink);
+}
+
+li::marker { color: var(--color-accent-2); }
+
+.card {
+  background-color: var(--color-surface);
+  border: 1px solid color-mix(in oklab, var(--color-ink) 10%, transparent);
+}
+

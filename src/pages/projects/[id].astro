@@ -1,0 +1,74 @@
+---
+import { getCollection, render } from "astro:content";
+import Layout from "../../layouts/layout.astro";
+import Moose from "../../components/moose.astro";
+import { formatMonthYearShort } from "../../lib/utils";
+import Prose from "../../components/prose.astro";
+
+export async function getStaticPaths() {
+  const pages = await getCollection("projectPages");
+  const overviews = await getCollection("projects");
+
+  const slugsWithExternalUrl = new Set(
+    overviews
+      .filter((ov) => typeof ov.data.url === "string" && ov.data.url.length > 0)
+      .map((ov) => ov.id.split("/")[1])
+  );
+
+  return pages
+    .map((page) => {
+      const parts = page.id.split("/");
+      const id = parts.length > 1 ? parts[1] : page.id;
+      return { id, page };
+    })
+    .filter(({ id }) => !slugsWithExternalUrl.has(id))
+    .map(({ id, page }) => ({
+      params: { id },
+      props: { page },
+    }));
+}
+
+const { page } = Astro.props;
+const parts = page.id.split("/");
+const projectId = parts.length > 1 ? parts[1] : page.id;
+
+const overviews = await getCollection("projects");
+const overview = overviews.find((e) => e.id.split("/")[1] === projectId);
+
+let seoTitle = overview?.data.title ?? projectId;
+let seoImage = overview?.data.image ?? undefined;
+
+const raw = overview?.body ?? page.body ?? "";
+const seoDescription = raw
+  .replace(/```[\s\S]*?```/g, " ")
+  .replace(/`[^`]*`/g, " ")
+  .replace(/!\[[^\]]*\]\([^\)]*\)/g, " ")
+  .replace(/\[[^\]]*\]\([^\)]*\)/g, " ")
+  .replace(/[>#*_~`-]/g, " ")
+  .replace(/\s+/g, " ")
+  .trim()
+  .slice(0, 160);
+
+const { Content } = await render(page);
+const overviewDateDisplay = overview?.data?.date
+  ? formatMonthYearShort(overview.data.date)
+  : undefined;
+---
+
+<Layout
+  title={`${seoTitle} — olifog`}
+  description={seoDescription}
+  ogImage={seoImage}
+>
+  <div class="flex w-full justify-center">
+    <a href="/">
+      <Moose />
+    </a>
+  </div>
+  {overviewDateDisplay && (
+    <div class="muted text-sm mt-2 mb-4">{overviewDateDisplay}</div>
+  )}
+  <Prose>
+    <Content />
+  </Prose>
+</Layout>
