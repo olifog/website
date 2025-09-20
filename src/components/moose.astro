@@ -1,7 +1,6 @@
 ---
 import Code from "./code.astro";
-import { readFileSync } from "node:fs";
-const moose = readFileSync(new URL("./moose.txt", import.meta.url), "utf-8");
+import moose from "./moose.txt?raw";
 
 ---
 
