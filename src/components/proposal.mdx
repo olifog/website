@@ -1,0 +1,181 @@
+*WIP proposal: last updated 7/10/2025*
+
+# A Hybrid Graph-Vector Database in OCaml
+
+## Introduction
+
+Retrieval-Augmented Generation (RAG) grounds LLM responses in external data. The naive approach to implementing RAG is to embed relevant documents,
+store them in a vector database, and then return the top k closest documents to an LLM's embedded query during a generation step.
+
+This approach is often insufficient for factual retrieval, as zero-shot dense retrievers can underperform keyword-aware ranking (e.g., BM25)
+on several BEIR datasets, and strong dense baselines still report cases where BM25 remains competitive or
+superior<sup><a href="#ref-1">[1]</a></sup>,<sup><a href="#ref-5">[5]</a></sup>. In practice, merging
+sparse and dense retrieval results improves recall and downstream RAG accuracy over using either in isolation<sup><a href="#ref-2">[2]</a></sup>.
+
+Recent hybrid sparse/dense retrieval systems such as GraphRAG<sup><a href="#ref-3">[3]</a></sup> have further demonstrated the value of graph structure
+in sparse retrieval. By carefully setting up a knowledge graph to expose semantically meaningful edges between well-defined entities, models can be
+augmented with much more powerful reasoning capabilities over embedded external data. However, most such systems are text-only, built as offline batch
+processes, and slow to update. Their indices are typically reconstructed in large jobs rather than incrementally maintained, and they rarely target
+lightweight, embeddable deployments. Likewise, general-purpose graph databases with vector add-ons tend to have runtime overhead and operational
+complexity that is undesirable for a small, embedded engine.
+
+Over the course of the project, I will produce a single-machine graph-vector database in OCaml, built on top of LMDB as an underlying B+-tree
+storage engine. Each node and edge can optionally have associated key-value metadata and/or a number of labelled vectors. For vector search queries
+over nodes and edges, a memory-mapped HNSW (Hierarchical Navigable Small Worlds)<sup><a href="#ref-4">[4]</a></sup> index implementation will be
+written and kept in sync with the central LMDB node/edge store. The database will support incremental indexing, snapshot-friendly reads, and an interface
+over Cap'n Proto that allows database clients in a variety of languages to execute hybrid graph CRUD/semantic search transactions. OxCaml will be
+employed where possible to provide safety guarantees for concurrency and low-level memory control.
+
+OCaml's strong type system, performance characteristics, and lightweight concurrency primitives make it a natural fit for this project, both in ease of
+development and for resulting performance/safety guarantees. Mature OCaml libraries exist for both Cap'n Proto and LMDB, along with Bigarray
+for efficient memory-mapped arrays and powerful parsing tooling (Menhir, Angstrom) for future query language extensions.
+
+## Starting Point
+
+I have previously explored a similar project in C++, https://github.com/olifog/stardust. This project gave me a grounding in the basics of
+Cap'n Proto and LMDB, and proved that the core joint graph/vector operations are possible if just wrapping around third-party HNSW and KV store libraries.
+I have limited experience with OCaml, exclusive to knowledge from the CST courses. I am new to OxCaml.
+
+## Project Structure
+
+The core of this project is a unified interface on top of two memory-mapped stores. A KV store will back node metadata, edge metadata, and adjacency
+lists. An HNSW index will store vector data to support efficient semantic search. The interface will keep transactions consistent between the two stores,
+incrementally adding/removing vectors to the HNSW index using snapshot epochs based on node/edge reads and writes to the graph store. This interface will
+be consumed by a Cap'n Proto server that exposes a cross-language protocol to communicate with the database.
+
+Design goals are correctness first (the KV store is the source of truth), predictable resource usage suitable for embedded deployments, incremental indexing
+to avoid long rebuilds, and simple snapshot-friendly reads for concurrent workloads. The concrete file formats and concurrency mechanics will be finalised
+during implementation.
+
+In priority order, the project can be further broken down into a number of components:
+
+- LMDB environment and database setup, with a thin wrapper exposing graph CRUD operations. The LMDB database key structure will need to be carefully
+  designed to be optimal for the most common expected operations.
+- HNSW index implementation, with a thin wrapper exposing vector search operations. Work will be needed here to allow delete operations, using tombstones
+  and epoch swaps or periodic rebuilds.
+- A unified interface over the two stores.
+- A careful synchronization mechanism between the two stores, or manager on top of the HNSW index that creates multiple epochs of memory-mapped HNSW slabs.
+- A Cap'n Proto schema and server that exposes the unified interface.
+- A test suite and benchmark suite for the database.
+
+## Extensions
+
+- Exploit Cap'n Proto promise pipelining to reduce round-trips for batched transactions and operations.
+- Replace LMDB with a custom memory-mapped B+-tree storage engine written using OxCaml's memory layout primitives.
+- Add a Cypher parser and query executor in addition to the raw graph/vector operations.
+- Produce a graph visualization web-app communicating over Cap'n Proto RPC.
+
+## Success Criteria
+
+- An LMDB-backed graph store with CRUD and graph traversal operations.
+- A memory-mapped HNSW implementation with add/delete/approximate k-NN.
+- A unified transactional API with incremental HNSW updates on graph transactions.
+- A Cap'n Proto RPC server with a minimal client to run tests and benchmarks.
+- Crash safety, on restart the database should rebuild affected HNSW epochs.
+- Performance is competitive with existing graph-only and vector-only peers for their respective operations.
+
+## Evaluation Plan
+
+The primary dataset that will be used to evaluate the project is a subgraph of Wikidata + a subset of Wikipedia.
+
+1. **Correctness**: Graph/vector CRUD and crash recovery will be verified through a suite of unit tests and an integrity checker.
+2. **HNSW Quality**: HNSW retrieval will be evaluated against brute-force nearest-neighbour search to confirm that recall remains
+  high at practical search speeds. Performance will also be compared against existing vector databases to verify that the implementation
+  behaves competitively for both latency and accuracy.
+3. **Graph Performance**: Basic graph workloads such as traversal, insertion, and querying will be benchmarked against contemporary
+  dedicated graph databases to check that the system approaches similar throughput and responsiveness.
+4. **(Optional/extension) Hybrid Retrieval**: To demonstrate the broader utility of a combined graph-vector design, an optional
+  Graph-RAG prototype may be built on top of the database. This experiment will test whether
+  hybrid and graph-augmented retrieval improves recall and ranking quality over sparse or dense retrieval alone. 
+
+
+## Plan of Work
+
+### Michaelmas Term
+
+- **Week 2/3/4 (16/10/25 - 05/11/25)**:
+  - Invest time into learning production-grade OCaml and OxCaml.
+  - Review the LMDB API and design a key structure for the graph store.
+  - Implement the LMDB wrapper and graph store.
+  - **Milestone:** LMDB-backed graph store with CRUD and graph traversal operations.
+- **Week 5/6 (06/11/25 - 19/11/25)**:
+  - Establish a scalable build system, test suite, and benchmark suite.
+  - Write comprehensive tests for the graph store.
+  - **Milestone:** Comprehensive test suite for the graph store.
+- **Week 7/8 (20/11/25 - 03/12/25)**:
+  - Write brute force nearest-neighbour search for testing purposes.
+  - Create a benchmarking/testing suite for vector retrieval.
+  - **Milestone:** Testing suite for vector retrieval, initial brute force search.
+
+### Christmas Holidays
+
+- **Week 1/2/3 (04/12/25 - 24/12/25)**:
+  - Implement the HNSW index and wrapper.
+  - Implement the unified interface and transaction manager.
+  - Fully test and benchmark the HNSW index, address any bugs or performance issues as necessary.
+  - **Milestone:** Single interface for a joint graph-vector database, with functional HNSW index.
+- **Week 4/5 (25/12/25 - 07/01/26)**:
+  - Implement the Cap'n Proto RPC server and client.
+  - **Milestone:** Cap'n Proto RPC server with a minimal client to run tests and benchmarks.
+- **Week 6/7 (08/01/26 - 21/01/26)**:
+  - Refactor and clean up the codebase, document core code.
+  - Expand the test suite and benchmark suite to cover all evaluation criteria.
+  - Start writing the progress report.
+  - **Milestone:** Success Criteria met.
+
+### Lent Term
+
+- **Week 1/2 (22/01/26 - 04/02/26)**:
+  - Finish writing the progress report.
+  - Prepare slides for the progress presentation.
+  - *Extension:* Cap'n Proto RPC Promise Pipelining.
+  - **Milestone:** Progress report complete. (Due 06/02/26)
+- **Week 3/4 (05/02/26 - 18/02/26)**:
+  - *Extension:* Cypher parser and query executor.
+- **Week 5/6 (19/02/26 - 04/03/26)**:
+  - Dissertation - Write Chapter 1: Introduction and Chapter 2: Preparation.
+  - *Extension:* Continue Cypher parser and query executor.
+- **Week 7/8 (05/03/26 - 18/03/26)**:
+  - Dissertation - Write Chapter 3: Implementation.
+  - *Extension:* Custom underlying B+-tree storage engine.
+
+### Easter Holidays
+
+- **Week 1/2 (19/03/26 - 01/04/26)**:
+  - Dissertation - Write Chapter 4: Evaluation.
+  - *Extension:* Finish up/extend in-progress extension work, or work on graph visualisation web-app.
+- **Week 3/4 (02/04/26 - 15/04/26)**:
+  - Dissertation - Write Chapter 5: Conclusions.
+  - Share full draft with supervisor and DoS.
+  - **Milestone:** Full dissertation draft complete and shared for review.
+- **Week 5/6 (16/04/26 - 29/04/26)**:
+  - Address feedback from supervisor and DoS.
+  - **Milestone:** Reviewed dissertation draft complete.
+
+### Easter Term
+
+- **Week 1/2 (30/04/26 - 13/05/26)**:
+  - Add any last extension work to dissertation.
+  - Finalise dissertation, last round of revisions.
+  - Prepare source code for submission.
+  - **Milestone:** Dissertation submitted on or before 15/05/26
+
+## Resource Declaration
+
+I will be working on my personal computer, a 16-inch 2021 Macbook Pro with 16GB of RAM. All code will be written on this local device and backed up
+to a private GitHub repository. I am fully responsible for this computer and regularly back it up to a secondary external drive, with a separate Linux
+laptop usable as a backup. Any LLM API calls needed for RAG evaluation will be provided through AWS Bedrock, in which I have a personal account with
+a sufficient number of existing credits. I will be writing my dissertation on my local device in LaTeX.
+
+## References
+
+<ol className="references">
+  <li id="ref-1">Thakur, N., Reimers, N., Rücklé, A., Srivastava, A., & Gurevych, I. (2021). BEIR: A Heterogeneous Benchmark for Zero-shot Evaluation of Information Retrieval Models. NeurIPS Datasets and Benchmarks. <a href="https://arxiv.org/abs/2104.08663">https://arxiv.org/abs/2104.08663</a></li>
+  <li id="ref-2">Sawarkar, K., Mangal, A., & Solanki, S. R. (2024). Blended RAG: Improving RAG Accuracy with Semantic Search and Hybrid Query-Based Retrievers. arXiv preprint. <a href="https://arxiv.org/abs/2404.07220">https://arxiv.org/abs/2404.07220</a></li>
+  <li id="ref-3">Microsoft Research. GraphRAG project. <a href="https://www.microsoft.com/en-us/research/project/graphrag/">https://www.microsoft.com/en-us/research/project/graphrag/</a></li>
+  <li id="ref-4">Malkov, Y. A., & Yashunin, D. A. (2020). Efficient and Robust Approximate Nearest Neighbor Search Using Hierarchical Navigable Small World Graphs. IEEE TPAMI. <a href="https://doi.org/10.1109/TPAMI.2018.2889473">https://doi.org/10.1109/TPAMI.2018.2889473</a></li>
+  <li id="ref-5">Izacard, G., Grave, E., Petroni, F., Hosseini, L., Riedel, S., & Bojanowski, P. (2022). Contriever: Unsupervised Dense Information Retrieval with Contrastive Learning. arXiv preprint. <a href="https://arxiv.org/abs/2112.09118">https://arxiv.org/abs/2112.09118</a></li>
+</ol>
+
+
+
