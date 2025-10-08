@@ -1,4 +1,4 @@
-*WIP proposal: last updated 7/10/2025*
+*WIP proposal: last updated 8/10/2025*
 
 # A Hybrid Graph-Vector Database in OCaml
 
@@ -23,18 +23,19 @@ Over the course of the project, I will produce a single-machine graph-vector dat
 storage engine. Each node and edge can optionally have associated key-value metadata and/or a number of labelled vectors. For vector search queries
 over nodes and edges, a memory-mapped HNSW (Hierarchical Navigable Small Worlds)<sup><a href="#ref-4">[4]</a></sup> index implementation will be
 written and kept in sync with the central LMDB node/edge store. The database will support incremental indexing, snapshot-friendly reads, and an interface
-over Cap'n Proto that allows database clients in a variety of languages to execute hybrid graph CRUD/semantic search transactions. OxCaml will be
-employed where possible to provide safety guarantees for concurrency and low-level memory control.
+over Cap'n Proto that allows database clients in a variety of languages to execute hybrid graph CRUD/semantic search transactions.
 
 OCaml's strong type system, performance characteristics, and lightweight concurrency primitives make it a natural fit for this project, both in ease of
 development and for resulting performance/safety guarantees. Mature OCaml libraries exist for both Cap'n Proto and LMDB, along with Bigarray
-for efficient memory-mapped arrays and powerful parsing tooling (Menhir, Angstrom) for future query language extensions.
+for efficient memory-mapped arrays and powerful parsing tooling (Menhir, Angstrom) for future query language extensions. The set of OxCaml extensions
+will also be useful for performance improvements as an extension, through allocation control and safe concurrency.
 
 ## Starting Point
 
 I have previously explored a similar project in C++, https://github.com/olifog/stardust. This project gave me a grounding in the basics of
 Cap'n Proto and LMDB, and proved that the core joint graph/vector operations are possible if just wrapping around third-party HNSW and KV store libraries.
-I have limited experience with OCaml, exclusive to knowledge from the CST courses. I am new to OxCaml.
+I have limited experience with OCaml, exclusive to knowledge from the CST courses. An existing set of LMDB bindings in OCaml,
+https://github.com/Drup/ocaml-lmdb, will be used as a starting point for the graph store.
 
 ## Project Structure
 
@@ -61,9 +62,9 @@ In priority order, the project can be further broken down into a number of compo
 ## Extensions
 
 - Exploit Cap'n Proto promise pipelining to reduce round-trips for batched transactions and operations.
-- Replace LMDB with a custom memory-mapped B+-tree storage engine written using OxCaml's memory layout primitives.
+- Crash safety, on restart the database should rebuild affected HNSW epochs.
 - Add a Cypher parser and query executor in addition to the raw graph/vector operations.
-- Produce a graph visualization web-app communicating over Cap'n Proto RPC.
+- Push performance to be competitive (or beat) existing graph-only and vector-only peers using OxCaml extensions.
 
 ## Success Criteria
 
@@ -71,8 +72,7 @@ In priority order, the project can be further broken down into a number of compo
 - A memory-mapped HNSW implementation with add/delete/approximate k-NN.
 - A unified transactional API with incremental HNSW updates on graph transactions.
 - A Cap'n Proto RPC server with a minimal client to run tests and benchmarks.
-- Crash safety, on restart the database should rebuild affected HNSW epochs.
-- Performance is competitive with existing graph-only and vector-only peers for their respective operations.
+- Performance is close to existing graph-only and vector-only peers for their respective operations.
 
 ## Evaluation Plan
 
@@ -128,22 +128,22 @@ The primary dataset that will be used to evaluate the project is a subgraph of W
 - **Week 1/2 (22/01/26 - 04/02/26)**:
   - Finish writing the progress report.
   - Prepare slides for the progress presentation.
-  - *Extension:* Cap'n Proto RPC Promise Pipelining.
+  - *Extension:* Performance improvements with OxCaml extensions.
   - **Milestone:** Progress report complete. (Due 06/02/26)
 - **Week 3/4 (05/02/26 - 18/02/26)**:
   - *Extension:* Cypher parser and query executor.
 - **Week 5/6 (19/02/26 - 04/03/26)**:
   - Dissertation - Write Chapter 1: Introduction and Chapter 2: Preparation.
-  - *Extension:* Continue Cypher parser and query executor.
+  - *Extension:* Crash safety for HNSW index.
 - **Week 7/8 (05/03/26 - 18/03/26)**:
   - Dissertation - Write Chapter 3: Implementation.
-  - *Extension:* Custom underlying B+-tree storage engine.
+  - *Extension:* Cap'n Proto RPC Promise Pipelining.
 
 ### Easter Holidays
 
 - **Week 1/2 (19/03/26 - 01/04/26)**:
   - Dissertation - Write Chapter 4: Evaluation.
-  - *Extension:* Finish up/extend in-progress extension work, or work on graph visualisation web-app.
+  - *Extension:* Finish up/extend in-progress extension work.
 - **Week 3/4 (02/04/26 - 15/04/26)**:
   - Dissertation - Write Chapter 5: Conclusions.
   - Share full draft with supervisor and DoS.
