@@ -1,8 +1,8 @@
 ---
-title: tripos pro
+title: tripos.pro
 tags: webapp, cambridge, ts, python
 date: 2024-11-15
-coolness: 7
+coolness: 9
 url: https://tripos.pro
 ---
 
