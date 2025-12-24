@@ -1,9 +1,16 @@
 ---
+export interface Props {
+  marginImages?: boolean;
+}
 
+const { marginImages = false } = Astro.props;
 ---
 
 <div
-  class="max-w-max prose prose-sm prose-h1:text-xl prose-h1:font-bold prose-a:underline prose-a:decoration-[--color-accent-2] prose-a:hover:text-accent"
+  class:list={[
+    "max-w-max prose prose-sm prose-h1:text-xl prose-h1:font-bold prose-a:underline prose-a:decoration-[--color-accent-2] prose-a:hover:text-accent",
+    { "prose-margin-images": marginImages }
+  ]}
 >
   <slot />
 </div>

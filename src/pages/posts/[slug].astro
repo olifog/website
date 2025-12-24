@@ -1,0 +1,56 @@
+---
+import { getCollection, render } from "astro:content";
+import Layout from "../../layouts/layout.astro";
+import Moose from "../../components/moose.astro";
+import { formatMonthYearShort } from "../../lib/utils";
+import Prose from "../../components/prose.astro";
+
+export async function getStaticPaths() {
+  const posts = await getCollection("posts");
+
+  return posts.map((post) => {
+    const slug = post.id.replace(/^posts\//, "").replace(/\.md$/, "");
+    return {
+      params: { slug },
+      props: { post },
+    };
+  });
+}
+
+const { post } = Astro.props;
+
+const { Content } = await render(post);
+const dateDisplay = formatMonthYearShort(post.data.date);
+
+const raw = post.body ?? "";
+const seoDescription = raw
+  .replace(/```[\s\S]*?```/g, " ")
+  .replace(/`[^`]*`/g, " ")
+  .replace(/!\[[^\]]*\]\([^\)]*\)/g, " ")
+  .replace(/\[[^\]]*\]\([^\)]*\)/g, " ")
+  .replace(/[>#*_~`-]/g, " ")
+  .replace(/\s+/g, " ")
+  .trim()
+  .slice(0, 160);
+---
+
+<Layout title={`${post.data.title} — olifog`} description={seoDescription}>
+  <div class="max-w-2xl mx-auto pb-32">
+    <div class="flex w-full justify-center">
+      <a href="/">
+        <Moose />
+      </a>
+    </div>
+    <div class="muted text-sm mt-2 mb-4">{dateDisplay}</div>
+    <Prose marginImages>
+      <Content />
+    </Prose>
+  </div>
+</Layout>
+
+<script>
+  document.querySelectorAll('.prose-margin-images img').forEach((img, i) => {
+    img.classList.add(i % 2 === 0 ? 'margin-right' : 'margin-left');
+  });
+</script>
+

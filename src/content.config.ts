@@ -34,9 +34,21 @@ const projectPages = defineCollection({
   schema: z.object({}).passthrough().optional(),
 });
 
+const posts = defineCollection({
+  loader: glob({
+    pattern: ["posts/*.md"],
+    base: "./src",
+  }),
+  schema: z.object({
+    title: z.string(),
+    date: z.date(),
+  }),
+});
+
 export const collections = {
   projects,
   projectPages,
+  posts,
 };
 
 

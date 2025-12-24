@@ -102,3 +102,48 @@ li::marker { color: var(--color-accent-2); }
   border: 1px solid color-mix(in oklab, var(--color-ink) 10%, transparent);
 }
 
+/* Post images - margin placement on desktop, inline on mobile */
+.prose-margin-images img {
+  max-width: 320px;
+  margin-block: 1rem;
+  margin-inline: auto;
+  display: block;
+}
+
+@media (min-width: 1024px) {
+  .prose-margin-images {
+    position: relative;
+  }
+  
+  .prose-margin-images p:has(> img) {
+    height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible;
+  }
+  
+  /* Collapse margins on ul elements adjacent to image paragraphs */
+  .prose-margin-images ul:has(+ p > img) {
+    margin-bottom: 0 !important;
+  }
+  
+  .prose-margin-images p:has(> img) + ul {
+    margin-top: 0 !important;
+  }
+  
+  .prose-margin-images img {
+    position: absolute;
+    max-width: 360px;
+    margin-block: 0;
+    transform: translateY(-50%);
+  }
+  
+  .prose-margin-images img.margin-left {
+    right: calc(100% + 2rem);
+  }
+  
+  .prose-margin-images img.margin-right {
+    left: calc(100% + 2rem);
+  }
+}
+

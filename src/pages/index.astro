@@ -2,6 +2,7 @@
 import MainPage from "../components/main-page.mdx";
 import Layout from "../layouts/layout.astro";
 import ProjectsGrid from "../components/projects-grid.astro";
+import PostsList from "../components/posts-list.astro";
 import Moose from "../components/moose.astro";
 import { Image } from "astro:assets";
 import meImg from "../assets/me.jpg";
@@ -15,6 +16,10 @@ import meImg from "../assets/me.jpg";
         <Moose />
       </div>
       <MainPage />
+    </div>
+    <div class="w-full flex flex-col gap-2">
+      <h3>read/me</h3>
+      <PostsList />
     </div>
     <div class="w-full flex flex-col gap-2">
       <h3>accumulated stuff</h3>
