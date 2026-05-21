@@ -49,6 +49,10 @@ const {
     <main class="mx-auto max-w-screen-lg w-full">
       <slot />
     </main>
+    <script>
+      import { inject } from "@vercel/analytics";
+      inject();
+    </script>
   </body>
 </html>
 
