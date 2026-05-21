@@ -2,7 +2,7 @@
 title: turing machine
 tags: python
 date: 2017-03-01
-coolness: 4
+coolness: 6
 url: https://github.com/olifog/Portable-Turing-Machine/blob/master/otmp/Roman_Numeral_Square_Root.txt
 ---
 

@@ -2,7 +2,7 @@
 title: aocucats
 tags: webapp, cambridge, ts
 date: 2024-05-01
-coolness: 7
+coolness: 5.5
 url: https://aoc.cucats.org
 ---
 

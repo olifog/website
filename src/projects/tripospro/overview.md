@@ -6,4 +6,4 @@ coolness: 9
 url: https://tripos.pro
 ---
 
-past paper tracker and rag search for cambridge cs exams
+past paper tracker and rag search for cambridge cs exams. used by the majority of the CS cohort

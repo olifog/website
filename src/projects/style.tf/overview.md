@@ -2,7 +2,7 @@
 title: style.tf
 tags: tf2, webapp, ts, python
 date: 2022-09-01
-coolness: 6
+coolness: 7
 image: /projects/styletf/styletf.jpg
 url: https://github.com/olifog/styletf
 ---

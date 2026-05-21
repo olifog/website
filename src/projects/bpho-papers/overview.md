@@ -2,7 +2,7 @@
 title: bpho papers
 tags: webapp, ts
 date: 2023-09-01
-coolness: 3
+coolness: 4
 url: https://papers.bpho.org.uk
 ---
 

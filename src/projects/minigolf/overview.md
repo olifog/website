@@ -2,7 +2,7 @@
 title: minigolf
 tags: game, python
 date: 2019-06-01
-coolness: 2
+coolness: 3
 url: https://github.com/olifog/MiniGolf
 ---
 

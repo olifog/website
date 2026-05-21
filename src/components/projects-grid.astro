@@ -1,7 +1,6 @@
 ---
 import { getCollection, render } from "astro:content";
 import ProjectCard from "./project-card.astro";
-import { Masonry } from "astro-masonry";
 
 const projects = await getCollection("projects");
 
@@ -26,35 +25,79 @@ const rendered = await Promise.all(
 );
 ---
 
-<div class="flex w-full flex-col items-start">
-  <div>
-    <Masonry
-      breakpointCols={{
-        default: 3,
-        900: 2,
-        700: 1,
-      }}
-      class="flex gap-6"
-      columnClass=""
-    >
-      {
-        rendered.map((p) => {
-          const C = p.Content;
-          return (
-            <div class="mb-6">
-              <ProjectCard
-                href={p.href}
-                title={p.title}
-                image={p.image}
-                tags={p.tags}
-                date={p.date}
-              >
-                <C />
-              </ProjectCard>
-            </div>
-          );
-        })
-      }
-    </Masonry>
+<div class="w-full" id="projects-masonry">
+  <div class="masonry-grid flex gap-6 justify-center"></div>
+  <div class="masonry-items hidden">
+    {
+      rendered.map((p) => {
+        const C = p.Content;
+        return (
+          <div class="masonry-item">
+            <ProjectCard
+              href={p.href}
+              title={p.title}
+              image={p.image}
+              tags={p.tags}
+              date={p.date}
+            >
+              <C />
+            </ProjectCard>
+          </div>
+        );
+      })
+    }
   </div>
 </div>
+
+<script>
+  function getColCount() {
+    const w = window.innerWidth;
+    if (w < 700) return 1;
+    if (w < 1100) return 2;
+    return 3;
+  }
+
+  function layoutMasonry() {
+    const container = document.getElementById('projects-masonry');
+    if (!container) return;
+
+    const items = container.querySelectorAll('.masonry-items .masonry-item');
+    const grid = container.querySelector('.masonry-grid') as HTMLElement;
+    if (!grid || !items.length) return;
+
+    const numCols = getColCount();
+
+    // Rebuild columns
+    grid.innerHTML = '';
+    const cols: HTMLElement[] = [];
+    for (let i = 0; i < numCols; i++) {
+      const col = document.createElement('div');
+      col.className = 'masonry-col flex flex-col gap-6 flex-1 min-w-0';
+      grid.appendChild(col);
+      cols.push(col);
+    }
+
+    // Track column heights
+    const heights = cols.map(() => 0);
+
+    // Greedily place each item in the shortest column
+    items.forEach(item => {
+      const shortest = heights.indexOf(Math.min(...heights));
+      const clone = item.cloneNode(true) as HTMLElement;
+      clone.classList.remove('masonry-item');
+      cols[shortest].appendChild(clone);
+      const hasImage = clone.querySelector('img') !== null;
+      const textLength = (clone.textContent || '').length;
+      heights[shortest] += hasImage ? 280 + textLength * 0.5 : 80 + textLength * 0.8;
+    });
+  }
+
+  layoutMasonry();
+  document.addEventListener('astro:page-load', layoutMasonry);
+
+  let resizeTimer: ReturnType<typeof setTimeout>;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(layoutMasonry, 150);
+  });
+</script>

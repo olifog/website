@@ -1,9 +1,9 @@
 ---
 title: SINAESTHESIA
 tags: game, godot
-date: 2025-02-01
-coolness: 6
 image: /projects/sinaesthesia/SINAESTHESIA.jpg
+date: 2025-02-15
+coolness: 7.5
 url: https://olifog.itch.io/sinaesthesia
 ---
 
