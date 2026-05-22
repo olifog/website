@@ -6,4 +6,4 @@ date: 2026-05-06
 coolness: 10.5
 ---
 
-programming competition platform I built from scratch. 1,500 players from 50+ countries across 500+ teams, live finals at cambridge union
+factorio-inspired programming competition - hit millions of games played by 1500+ players from 50+ countries, with live finals at the cambridge union

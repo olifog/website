@@ -5,4 +5,4 @@ date: 2026-05-01
 coolness: 9.5
 ---
 
-hybrid graph/vector database in OCaml. MVCC, HNSW, AVX-512 SIMD. cambridge cs dissertation
+my dissertation!!! hybrid graph/vector database in OCaml with vector search and concurrency control
