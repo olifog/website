@@ -27,12 +27,12 @@ const rendered = await Promise.all(
 
 <div class="w-full" id="projects-masonry">
   <div class="masonry-grid flex gap-6 justify-center"></div>
-  <div class="masonry-items hidden">
+  <div class="masonry-items columns-1 sm:columns-2 lg:columns-3 gap-6">
     {
       rendered.map((p) => {
         const C = p.Content;
         return (
-          <div class="masonry-item">
+          <div class="masonry-item break-inside-avoid mb-6">
             <ProjectCard
               href={p.href}
               title={p.title}
@@ -61,9 +61,10 @@ const rendered = await Promise.all(
     const container = document.getElementById('projects-masonry');
     if (!container) return;
 
+    const itemsContainer = container.querySelector('.masonry-items') as HTMLElement;
     const items = container.querySelectorAll('.masonry-items .masonry-item');
     const grid = container.querySelector('.masonry-grid') as HTMLElement;
-    if (!grid || !items.length) return;
+    if (!grid || !items.length || !itemsContainer) return;
 
     const numCols = getColCount();
 
@@ -84,12 +85,15 @@ const rendered = await Promise.all(
     items.forEach(item => {
       const shortest = heights.indexOf(Math.min(...heights));
       const clone = item.cloneNode(true) as HTMLElement;
-      clone.classList.remove('masonry-item');
+      clone.classList.remove('masonry-item', 'break-inside-avoid', 'mb-6');
       cols[shortest].appendChild(clone);
       const hasImage = clone.querySelector('img') !== null;
       const textLength = (clone.textContent || '').length;
       heights[shortest] += hasImage ? 280 + textLength * 0.5 : 80 + textLength * 0.8;
     });
+
+    // Hide the CSS-column fallback, show the JS masonry grid
+    itemsContainer.style.display = 'none';
   }
 
   layoutMasonry();
